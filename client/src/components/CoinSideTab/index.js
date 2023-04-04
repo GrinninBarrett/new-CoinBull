@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 
 const CoinSideTab = (coin) => {
   let { name, id, logo_url, price, change, favorite, handleDeleteCoin, handleAddFavorite } = coin;
-  price = parseFloat(price).toFixed(2);
-  change = parseFloat(change * 100).toFixed(2);
+  // price = parseFloat(price).toFixed(2);
+  // change = parseFloat(change * 100).toFixed(2);
   
 
   const [isFavorite, setIsFavorite] = useState(favorite);
@@ -13,6 +13,8 @@ const CoinSideTab = (coin) => {
 
   // circulating_supply = circulating_supply.replace(/(.)(?=(\d{3})+$)/g, "$1,");
   // market_cap = market_cap.replace(/(.)(?=(\d{3})+$)/g, "$1,");
+  change = parseFloat(change).toFixed(2);
+  price = Number(price.toFixed(2)).toLocaleString('en-US');
 
   return (
     <tr>

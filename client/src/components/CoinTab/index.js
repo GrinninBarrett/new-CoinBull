@@ -25,7 +25,7 @@ const CoinTab = (coin) => {
   const [isFavorite, setIsFavorite] = useState(favorite);
   const [isActive, setIsActive] = useState(false);
 
-  price = parseFloat(price).toFixed(2);
+  price = Number(price.toFixed(2)).toLocaleString('en-US');
   circulating_supply = Number(circulating_supply.toFixed(2)).toLocaleString("en-US");
   market_cap = Number(market_cap.toFixed(2)).toLocaleString("en-US");
   // circulating_supply = circulating_supply.replace(/(.)(?=(\d{3})+$)/g, "$1,");
