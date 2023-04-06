@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 
 import CoinTab from "../CoinTab";
 import Pagination from "../Pagination";
-import { getAllCoins, newGetAllCoins } from "../../utils/API";
+import { newGetAllCoins } from "../../utils/API";
 import { ADD_FAVORITE } from "../../utils/mutations";
-import { useMutation } from "@apollo/client";
+import { GET_MY_FAVORITES } from "../../utils/queries";
+import { useMutation, useQuery } from "@apollo/client";
 import Auth from "../../utils/auth";
 import {
   AddFavoriteCoinIds,
@@ -25,9 +26,35 @@ function ProductList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [coinsPerPage] = useState(20);
   const [sortOrder, setSortOrder] = useState({ sortTarget: "", value: false });
-  const [favoriteCoinIds, setFavoriteCoinIds] = useState(getFavoriteCoinIds());
+  // let currentFavoriteCoinIds = getFavoriteCoinIds();
 
+  const [favoriteCoinIds, setFavoriteCoinIds] = useState([]);
+  console.log(favoriteCoinIds)
+
+  const [addFavorite] = useMutation(ADD_FAVORITE);
   const [removeCoinFromFavorite] = useMutation(REMOVE_COIN);
+  const { loading, data } = useQuery(GET_MY_FAVORITES);
+
+ 
+  const userData = useMemo(() => {
+    return data?.getFavoriteCoins || [];
+  }, [data?.getFavoriteCoins])
+
+  console.log(userData.favorites);
+
+
+  useEffect(() => {
+    const setFavorites = async () => {
+      if (userData.favorites) {
+        console.log(userData.favorites);
+        const uniqueCoins = userData.favorites.map((coin) => coin.ticker);
+        console.log(uniqueCoins);
+        setFavoriteCoinIds([...uniqueCoins]);
+      }
+    }
+    setFavorites();
+  }, [userData]);
+
 
   useEffect(() => {
     const fetchCoins = async () => {
@@ -35,8 +62,13 @@ function ProductList() {
         // const coins = await getAllCoins();
         // setCoinsState(coins);
         const coins = await newGetAllCoins();
-        console.log(coins)
-        setCoinsState(coins);
+        let updatedCoins = coins.map(coin => {
+          //done because new API brings symbol back lowercase but the code is set up for uppercase symbols
+          coin.symbol = coin.symbol.toUpperCase();
+          return coin;
+        })
+        console.log(updatedCoins);
+        setCoinsState(updatedCoins);
       } catch (err) {
         console.error(err);
       }
@@ -74,8 +106,8 @@ function ProductList() {
           toBeSortedA = +a[toBeSorted];
           toBeSortedB = +b[toBeSorted];
         } else if (sortOrder.sortTarget === "change") {
-          toBeSortedA = a["1d"].price_change_pct;
-          toBeSortedB = b["1d"].price_change_pct;
+          toBeSortedA = a.price_change_percentage_24h;
+          toBeSortedB = b.price_change_percentage_24h;
         }
 
         let comparison = 0;
@@ -95,23 +127,22 @@ function ProductList() {
     }
   }, [coinsState, sortOrder]);
 
-  const [addFavorite] = useMutation(ADD_FAVORITE);
-
   const handleAddFavorite = async (coinId) => {
-    const coinToFavorite = coinsState.find((coin) => coin.id === coinId);
-
-    const { id, symbol, name, price, market_cap, logo_url } = coinToFavorite;
-
-    let oneDay;
+    const coinToFavorite = coinsState.find((coin) => coin.symbol === coinId);
+    console.log(JSON.stringify(coinsState))
+    console.log(coinToFavorite);
+    const { id, symbol, name, current_price, market_cap, image, price_change_percentage_24h, total_volume } = coinToFavorite;
+    console.log(symbol, id);
+    // let oneDay;
 
     // Ensures this works, since variables can't begin with numbers
-    for (const key in coinToFavorite) {
-      if (key === "1d") {
-        oneDay = coinToFavorite[key];
-      }
-    }
+    // for (const key in coinToFavorite) {
+    //   if (key === "1d") {
+    //     oneDay = coinToFavorite[key];
+    //   }
+    // }
 
-    const { price_change_pct, volume } = oneDay;
+    // const { price_change_percentage_24h, volume } = oneDay;
 
     // get token
     const token = Auth.loggedIn() ? Auth.getToken() : null;
@@ -121,23 +152,29 @@ function ProductList() {
     }
 
     try {
+      console.log(favoriteCoinIds)
+
       await addFavorite({
         variables: {
+          //includes toString() on some values because api returns number types but GraphQL doesn't like that
           input: {
             name: name,
             ticker: symbol,
-            price: price,
-            volume: volume,
-            dayPercentChange: price_change_pct,
-            marketCap: market_cap,
-            logoURL: logo_url,
+            price: current_price.toString(),
+            volume: total_volume.toString(),
+            dayPercentChange: price_change_percentage_24h.toString(),
+            marketCap: market_cap.toString(),
+            logoURL: image,
           },
         },
       });
-      setFavoriteCoinIds([...favoriteCoinIds, id]);
-      AddFavoriteCoinIds(favoriteCoinIds);
+      console.log(favoriteCoinIds)
+      let updatedFavoriteCoinIds = [...favoriteCoinIds, symbol];
+      console.log(updatedFavoriteCoinIds);
+      setFavoriteCoinIds(updatedFavoriteCoinIds);
+      AddFavoriteCoinIds(updatedFavoriteCoinIds);
     } catch (err) {
-      console.error(err);
+      console.error(`here is an error: ${JSON.stringify(err)}`);
     }
   };
 
@@ -162,9 +199,17 @@ function ProductList() {
     }
   };
 
+  const handleCheckFavorites = (coin) => {
+    const localStorageFavorites = getFavoriteCoinIds();
+    // const newFavorites = localStorageFavorites;
+    return localStorageFavorites.includes(coin);
+    // return favoriteCoinIds.includes(coin);
+  }
+
   const indexOfLastCoin = currentPage * coinsPerPage;
   const indexOfFirstCoin = indexOfLastCoin - coinsPerPage;
   const currentCoins = coinsState.slice(indexOfFirstCoin, indexOfLastCoin);
+  
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -233,7 +278,8 @@ function ProductList() {
                 market_cap={coin.market_cap}
                 handleAddFavorite={handleAddFavorite}
                 handleDeleteCoin={handleDeleteCoin}
-                favorite={favoriteCoinIds.includes(coin.id)}
+                favorite={handleCheckFavorites(coin.symbol)}
+                // favorite={favoriteCoinIds.includes(coin.symbol)}
               />
             ))}
           </tbody>

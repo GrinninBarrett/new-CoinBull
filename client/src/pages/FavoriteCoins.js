@@ -18,6 +18,7 @@ const FavoriteCoins = () => {
 
   useEffect(() => {
     if (userData.favorites) {
+      console.log(userData.favorites);
       const uniqueCoins = [
         ...new Map(
           userData.favorites.map((coin) => [coin.name, coin])

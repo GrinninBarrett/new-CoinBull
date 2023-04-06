@@ -1,5 +1,6 @@
 import axios from "axios";
 
+// No longer functional - Nomics ended their service
 const nomicsURL = `https://api.nomics.com/v1/currencies/ticker?key=001b0fad7295e9be8c2270792dcc4efb3763624e&interval=1d,30d&convert=USD&per-page=100&page=1`;
 export async function getAllCoins() {
   const res = await axios.get(nomicsURL);
@@ -8,6 +9,7 @@ export async function getAllCoins() {
   return coins;
 }
 
+// Used for getting all coin data
 const coinGeckoURL = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=USD&order=market_cap_desc&per_page=100&page=1&sparkline=false&locale=en`
 export async function newGetAllCoins() {
   const res = await axios.get(coinGeckoURL);
@@ -22,6 +24,7 @@ export async function getASingleCoin() {
   const coin = res.data;
   return coin;
 }
+
 // Gets news from Lunarcrush
 export async function getNews(symbol) {
   const res = await axios({
