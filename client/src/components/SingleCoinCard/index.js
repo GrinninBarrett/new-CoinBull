@@ -49,10 +49,10 @@ const SingleCoinCard = ({
           locale="en"
         ></coingecko-coin-ticker-widget>
         <Helmet>
-          {/* {scriptTag} */}
-        <script src="https://widgets.coingecko.com/coingecko-coin-ticker-widget.js" async></script>
-
-          {/* <script src="https://widget.nomics.com/embed.js"></script> */}
+          <script
+            src="https://widgets.coingecko.com/coingecko-coin-ticker-widget.js"
+            async
+          ></script>
         </Helmet>
       </div>
       <footer
