@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Helmet } from "react-helmet";
 import PurchaseModal from "../PurchaseModal";
 
@@ -9,6 +9,25 @@ const SingleCoinCard = ({
   handleModalRemoval,
   initializer,
 }) => {
+  // const [scriptTag, setScriptTag] = useState('');
+
+  // useEffect(() => {
+  //   setScriptTag('<script src="https://widgets.coingecko.com/coingecko-coin-ticker-widget.js"></script>')
+  // }, [])
+  // const isLoaded = useRef(false)
+  // const url = "https://widgets.coingecko.com/coingecko-coin-ticker-widget.js";
+
+  // useEffect(() => {
+  //   const head = document.querySelector("head");
+  //   const script = document.createElement("script");
+  //   script.setAttribute("src", url);
+  //   head.appendChild(script);
+
+  //   return () => {
+  //     head.removeChild(script);
+  //   };
+  // }, []);
+
   return (
     <div
       className="card m-3 p-2 widget-card is-flex is-justify-content-center"
@@ -18,14 +37,22 @@ const SingleCoinCard = ({
         className="card-content"
         style={{ boxShadow: "8px 8px 15px #D9D9DA, -8px -8px 15px #D9D9DA" }}
       >
-        <div
+        {/* <div
           className="nomics-ticker-widget"
           data-name={`${coin.name}`}
-          data-base={`${coin.ticker}`}
+          data-base={`${coin.symbol}`}
           data-quote="USD"
-        ></div>
+        ></div> */}
+        <coingecko-coin-ticker-widget
+          coin-id={coin.id}
+          currency="usd"
+          locale="en"
+        ></coingecko-coin-ticker-widget>
         <Helmet>
-          <script src="https://widget.nomics.com/embed.js"></script>
+          {/* {scriptTag} */}
+        <script src="https://widgets.coingecko.com/coingecko-coin-ticker-widget.js" async></script>
+
+          {/* <script src="https://widget.nomics.com/embed.js"></script> */}
         </Helmet>
       </div>
       <footer
@@ -36,13 +63,13 @@ const SingleCoinCard = ({
           className="card-footer-item cards-buttons"
           style={{ backgroundColor: "rgb(56, 200, 56)", color: "white" }}
           type="button"
-          onClick={() => handleDeleteCoin(coin.name, coin.ticker)}
+          onClick={() => handleDeleteCoin(coin.name, coin.symbol)}
         >
           Delete
         </button>
         <button
           className="card-footer-item cards-buttons"
-          id={coin.ticker}
+          id={coin.symbol}
           type="button"
           style={{ backgroundColor: "rgb(56, 200, 56)", color: "white" }}
           onClick={handlePurchaseButton}
@@ -53,7 +80,7 @@ const SingleCoinCard = ({
         <PurchaseModal
           handleModalRemoval={handleModalRemoval}
           initializer={initializer}
-          ticker={coin.ticker}
+          ticker={coin.symbol}
         />
       </footer>
     </div>

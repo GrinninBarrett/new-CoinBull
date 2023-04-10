@@ -223,7 +223,7 @@ const Home = () => {
       </Helmet>
       <div
         id="cr-widget-marquee"
-        data-coins="ripple,binance-coin,bitcoin,ethereum,tether,eos,monero,dogecoin,shiba-inu,luna,avalanche,chainlink,wrapped-bitcoin,algorand,uniswap,usdcoin,binance-usd,bitcoin-cash,stellar,ethereum-classic"
+        data-coins="ripple,bitcoin,ethereum,tether,eos,monero,dogecoin,shiba-inu,luna,avalanche,chainlink,wrapped-bitcoin,algorand,uniswap,usdcoin,binance-usd,bitcoin-cash,stellar,ethereum-classic"
         data-theme="light"
         data-show-symbol="true"
         data-show-icon="true"
